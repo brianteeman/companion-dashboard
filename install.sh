@@ -65,7 +65,7 @@ echo ""
 
 # Construct expected filenames
 DEB_FILENAME="Companion.Dashboard-${VERSION_NUMBER}-linux-${DEB_ARCH}.deb"
-INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO/$VERSION/$INSTALL_SCRIPT"
+INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO/main/$INSTALL_SCRIPT"
 
 # Find download URL for the .deb file
 DEB_URL=$(echo "$RELEASE_INFO" | jq -r ".assets[] | select(.name == \"$DEB_FILENAME\") | .browser_download_url")
