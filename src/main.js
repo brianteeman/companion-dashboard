@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -395,7 +395,7 @@ async function findAvailablePort(startPort, windowId) {
 }
 
 // IPC handlers for web server (per-window)
-ipcMain.handle('web-server-start', async (event, port) => {
+ipcMain.handle('web-server-start', async (event, port, hostname) => {
     try {
         const webServer = getWebServerForWindow(event);
         const senderWindow = BrowserWindow.fromWebContents(event.sender);
@@ -403,7 +403,7 @@ ipcMain.handle('web-server-start', async (event, port) => {
         // Auto-assign port based on window ID if not specified
         const targetPort = port || await findAvailablePort(8100, senderWindow.windowId);
 
-        webServer.start(targetPort);
+        webServer.start(targetPort, hostname);
 
         // Wait for server to actually start before saving states
         setTimeout(() => {
@@ -456,6 +456,17 @@ ipcMain.handle('web-server-update-state', async (event, state) => {
 
         return { success: true };
     } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+// Handler to open URLs in external browser
+ipcMain.handle('open-external', async (event, url) => {
+    try {
+        await shell.openExternal(url);
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to open external URL:', error);
         return { success: false, error: error.message };
     }
 });

@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
+import { Bonjour } from 'bonjour-service';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,6 +18,8 @@ class DashboardWebServer {
         this.clients = new Set();
         this.fullAppClients = new Set(); // Separate tracking for full app clients
         this.onStateChange = onStateChange; // Callback for bidirectional sync from full app
+        this.bonjour = null;
+        this.bonjourService = null;
         this.currentState = {
             boxes: [],
             canvasSettings: {},
@@ -25,13 +28,14 @@ class DashboardWebServer {
         };
     }
 
-    start(port = 8100) {
+    start(port = 80, hostname = 'dashboard') {
         if (this.isRunning) {
             console.log('Web server already running');
             return;
         }
 
         this.port = port;
+        this.hostname = hostname;
         
         // Enable CORS
         this.app.use(cors());
@@ -92,8 +96,28 @@ class DashboardWebServer {
         this.server = this.app.listen(port, '0.0.0.0', () => {
             console.log(`Dashboard web server running on http://localhost:${port}`);
             this.isRunning = true;
+
+            // Publish mDNS service
+            if (this.hostname) {
+                try {
+                    this.bonjour = new Bonjour();
+                    this.bonjourService = this.bonjour.publish({
+                        name: this.hostname,
+                        type: 'http',
+                        port: this.port,
+                        host: `${this.hostname}.local`,
+                        txt: {
+                            service: 'Companion Dashboard'
+                        }
+                    });
+                    const portSuffix = this.port === 80 ? '' : `:${this.port}`;
+                    console.log(`mDNS service published: ${this.hostname}.local${portSuffix}`);
+                } catch (error) {
+                    console.error('Failed to publish mDNS service:', error);
+                }
+            }
         });
-        
+
         // Setup WebSocket server
         this.wss = new WebSocketServer({ server: this.server });
         
@@ -176,11 +200,34 @@ class DashboardWebServer {
         });
         this.fullAppClients.clear();
         
+        // Unpublish mDNS service
+        if (this.bonjourService) {
+            try {
+                this.bonjourService.stop();
+                this.bonjourService = null;
+                console.log('mDNS service unpublished');
+            } catch (error) {
+                console.error('Failed to unpublish mDNS service:', error);
+            }
+        }
+
+        // Destroy Bonjour instance
+        if (this.bonjour) {
+            try {
+                this.bonjour.destroy();
+                console.log('Bonjour instance destroyed');
+            } catch (error) {
+                console.error('Failed to destroy Bonjour instance:', error);
+            } finally {
+                this.bonjour = null;
+            }
+        }
+
         // Close WebSocket server
         if (this.wss) {
             this.wss.close();
         }
-        
+
         // Close HTTP server
         if (this.server) {
             this.server.close(() => {
@@ -256,6 +303,20 @@ class DashboardWebServer {
     getEndpoints() {
         const baseUrls = this.getNetworkInterfaces();
         const endpoints = [];
+
+        // Add .local mDNS endpoint if hostname is set
+        if (this.hostname) {
+            const portSuffix = this.port === 80 ? '' : `:${this.port}`;
+            const localUrl = `http://${this.hostname}.local${portSuffix}`;
+            endpoints.push({
+                url: localUrl,
+                type: 'read-only'
+            });
+            endpoints.push({
+                url: `${localUrl}/control`,
+                type: 'full-app'
+            });
+        }
 
         baseUrls.forEach(base => {
             // Add read-only endpoint

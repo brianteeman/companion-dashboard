@@ -109,7 +109,8 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     const showWebServer = isDesktop || isDev;
 
     // Web server state
-    const [webServerPort, setWebServerPort] = useState<number>(8100);
+    const [webServerPort, setWebServerPort] = useState<number>(80);
+    const [webServerHostname, setWebServerHostname] = useState<string>('dashboard');
     const [webServerRunning, setWebServerRunning] = useState<boolean>(false);
     const [webServerStatus, setWebServerStatus] = useState<string>('Stopped');
     const [webServerEndpoints, setWebServerEndpoints] = useState<any[]>([]);
@@ -123,11 +124,12 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                 return;
             }
             // @ts-ignore - electronAPI is available via preload script
-            const result = await window.electronAPI?.webServer.start(webServerPort);
+            const result = await window.electronAPI?.webServer.start(webServerPort, webServerHostname);
             if (result?.success) {
                 setWebServerRunning(true);
                 setWebServerStatus(`Running on port ${result.port}`);
                 localStorage.setItem(`window_${windowId}_web_server_port`, webServerPort.toString());
+                localStorage.setItem(`window_${windowId}_web_server_hostname`, webServerHostname);
                 console.log(`Web server started on port ${result.port}`);
             } else {
                 setWebServerStatus(`Failed: ${result?.error || 'Unknown error'}`);
@@ -178,12 +180,16 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     };
 
 
-    // Load saved web server port on mount
+    // Load saved web server port and hostname on mount
     useEffect(() => {
         if (showWebServer) {
             const savedPort = localStorage.getItem(`window_${windowId}_web_server_port`);
             if (savedPort) {
                 setWebServerPort(parseInt(savedPort, 10));
+            }
+            const savedHostname = localStorage.getItem(`window_${windowId}_web_server_hostname`);
+            if (savedHostname) {
+                setWebServerHostname(savedHostname);
             }
             checkWebServerStatus();
         }
@@ -1253,11 +1259,24 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             <div className='menu-section'>
                                 <div className="web-server-controls">
                                     <div className="web-server-port-container">
+                                        <label htmlFor="web-server-hostname">mDNS:</label>
+                                        <input
+                                            id="web-server-hostname"
+                                            type="text"
+                                            value={webServerHostname}
+                                            onChange={(e) => setWebServerHostname(e.target.value)}
+                                            disabled={webServerRunning}
+                                            placeholder="dashboard"
+                                            style={{ width: '120px', marginLeft: '10px' }}
+                                        />
+                                        <span style={{ marginLeft: '5px', opacity: 0.6 }}>.local</span>
+                                    </div>
+                                    <div className="web-server-port-container">
                                         <label htmlFor="web-server-port">Port:</label>
                                         <input
                                             id="web-server-port"
                                             type="number"
-                                            min="1024"
+                                            min="1"
                                             max="65535"
                                             value={webServerPort}
                                             onChange={(e) => {
@@ -1298,9 +1317,15 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                                 {webServerEndpoints.filter(e => e.type === 'read-only').map((endpoint, index) => (
                                                     <a
                                                         key={`ro-${index}`}
-                                                        href={endpoint.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                        href="#"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            if ((window as any).electronAPI?.openExternal) {
+                                                                (window as any).electronAPI.openExternal(endpoint.url);
+                                                            } else {
+                                                                window.open(endpoint.url, '_blank', 'noopener,noreferrer');
+                                                            }
+                                                        }}
                                                         className="endpoint-link"
                                                     >
                                                         <code>{endpoint.url}</code>
@@ -1317,9 +1342,15 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                                 {webServerEndpoints.filter(e => e.type === 'full-app').map((endpoint, index) => (
                                                     <a
                                                         key={`fa-${index}`}
-                                                        href={endpoint.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                        href="#"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            if ((window as any).electronAPI?.openExternal) {
+                                                                (window as any).electronAPI.openExternal(endpoint.url);
+                                                            } else {
+                                                                window.open(endpoint.url, '_blank', 'noopener,noreferrer');
+                                                            }
+                                                        }}
                                                         className="endpoint-link"
                                                     >
                                                         <code>{endpoint.url}</code>

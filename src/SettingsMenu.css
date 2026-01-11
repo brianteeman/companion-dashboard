@@ -590,7 +590,8 @@ a {
     border-color: #61BAFA;
 }
 
-.web-server-port-container input[type="number"]:disabled {
+.web-server-port-container input[type="number"]:disabled,
+.web-server-port-container input[type="text"]:disabled {
     background-color: #333;
     color: #888;
     cursor: not-allowed;
