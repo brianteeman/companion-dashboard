@@ -61,13 +61,13 @@ DEB_FILE=""
 
 # First check: Same directory as script (most common for SCP)
 if [ -z "$DEB_FILE" ]; then
-    DEB_FILE=$(ls -t "$SCRIPT_DIR"/"Companion Dashboard"-*.deb 2>/dev/null | head -1)
+    DEB_FILE=$(ls -t "$SCRIPT_DIR"/"Companion.Dashboard"-*.deb 2>/dev/null | head -1)
     [ -n "$DEB_FILE" ] && echo "Found in script directory: $DEB_FILE"
 fi
 
 # Second check: out/ subdirectory (if running from project root)
 if [ -z "$DEB_FILE" ]; then
-    DEB_FILE=$(ls -t "$SCRIPT_DIR"/out/"Companion Dashboard"-*.deb 2>/dev/null | head -1)
+    DEB_FILE=$(ls -t "$SCRIPT_DIR"/out/"Companion.Dashboard"-*.deb 2>/dev/null | head -1)
     [ -n "$DEB_FILE" ] && echo "Found in out/ directory: $DEB_FILE"
 fi
 
