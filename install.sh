@@ -64,7 +64,7 @@ echo "Latest version: $VERSION"
 echo ""
 
 # Construct expected filenames
-DEB_FILENAME="Companion Dashboard-${VERSION_NUMBER}-linux-${DEB_ARCH}.deb"
+DEB_FILENAME="Companion.Dashboard-${VERSION_NUMBER}-linux-${DEB_ARCH}.deb"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO/$VERSION/$INSTALL_SCRIPT"
 
 # Find download URL for the .deb file
