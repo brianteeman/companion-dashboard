@@ -146,30 +146,14 @@ export DISPLAY=:0
 # Start the web server in the background
 if [ -f /usr/bin/companion-dashboard ]; then
     # If installed via .deb
-    /usr/bin/companion-dashboard --no-sandbox &
+    /usr/bin/companion-dashboard --no-sandbox --kiosk-mode &
 else
     # If installed manually
-    npx electron . --no-sandbox &
+    npx electron . --no-sandbox --kiosk-mode &
 fi
 
-# Get the PID
+# Get the PID and wait for it to complete
 ELECTRON_PID=$!
-
-# Wait a moment for the server to start
-sleep 3
-
-# Open the display view in full-screen Chromium/Firefox
-if command -v chromium-browser &> /dev/null; then
-    chromium-browser --kiosk --app=http://localhost/ --disable-infobars --noerrdialogs &
-elif command -v firefox &> /dev/null; then
-    firefox --kiosk http://localhost/ &
-else
-    echo "No suitable browser found. Install chromium-browser or firefox."
-    kill $ELECTRON_PID
-    exit 1
-fi
-
-# Keep the script running
 wait $ELECTRON_PID
 STARTSCRIPT_EOF
 
@@ -269,10 +253,6 @@ else
         echo "⚠ WARNING: Node.js not found. Installation may be incomplete."
     fi
 fi
-
-# Install chromium-browser for kiosk mode
-echo "Installing Chromium browser for kiosk mode..."
-apt-get install -y chromium-browser
 
 # Verify installation integrity
 echo "Verifying installation..."

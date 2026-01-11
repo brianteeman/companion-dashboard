@@ -362,6 +362,24 @@ app.whenReady().then(() => {
             createWindow();
         }
     });
+
+    // Auto-start web server in kiosk mode (for headless installations)
+    const isKioskMode = process.argv.includes('--kiosk-mode');
+    if (isKioskMode) {
+        console.log('Kiosk mode detected - auto-starting web server on port 80');
+        setTimeout(() => {
+            const windows = BrowserWindow.getAllWindows();
+            if (windows.length > 0) {
+                const webServer = getWebServerForWindow({ sender: windows[0].webContents });
+                try {
+                    webServer.start(80, 'dashboard');
+                    console.log('Web server auto-started successfully');
+                } catch (error) {
+                    console.error('Failed to auto-start web server:', error);
+                }
+            }
+        }, 1000);
+    }
 });
 
 app.on('window-all-closed', () => {
