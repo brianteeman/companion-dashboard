@@ -554,7 +554,7 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
         };
     }, [isActive]);
 
-    const [visible, setVisible] = useState(true);
+    const [visible, setVisible] = useState(false);
     const timeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
