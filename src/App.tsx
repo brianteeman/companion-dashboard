@@ -284,17 +284,16 @@ export default function App() {
         return localStorage.getItem(FONT_STORAGE_KEY) || 'Work Sans';
     });
 
-    // Check if we're in display mode (root path, not /control) or kiosk mode
+    // Check if we're in display mode (root path, not /control)
     const [isDisplayMode] = useState<boolean>(() => {
         if (typeof window === 'undefined') return false;
         const isRootPath = window.location.pathname === '/';
         const isElectron = !!(window as any).electronAPI;
         const isCapacitor = Capacitor.isNativePlatform();
-        const isKioskMode = !!(window as any).electronAPI?.isKioskMode;
-        return (isRootPath && !isElectron && !isCapacitor) || isKioskMode;
+        return isRootPath && !isElectron && !isCapacitor;
     });
 
-    // Boxes locked state - initialize from localStorage, but force true in display mode or kiosk mode
+    // Boxes locked state - initialize from localStorage, but force true in display mode
     const [boxesLocked, setBoxesLocked] = useState<boolean>(() => {
         if (isDisplayMode) {
             return true; // Always locked in display mode

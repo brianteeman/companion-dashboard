@@ -130,6 +130,12 @@ function createWindow(windowState = null) {
         window.maximize();
     }
 
+    // Set fullscreen in kiosk mode
+    const isKioskMode = process.argv.includes('--kiosk-mode');
+    if (isKioskMode) {
+        window.setFullScreen(true);
+    }
+
     // Restore always on top state
     if (state.alwaysOnTop) {
         window.setAlwaysOnTop(true);
