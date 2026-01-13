@@ -597,9 +597,26 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     }, []);
 
     const handleUrlSubmit = () => {
+        const trimmedUrl = inputUrl.trim();
+
+        // If field is empty, disconnect
+        if (!trimmedUrl) {
+            setInputUrl('');
+            localStorage.setItem(STORAGE_KEY, '');
+            onConnectionUrlChange('');
+            setIsValidUrl(null);
+            return;
+        }
+
         try {
-            const url = new URL(inputUrl.trim());
+            let urlToParse = trimmedUrl;
+            // Add http:// if no protocol specified
+            if (!urlToParse.startsWith('http://') && !urlToParse.startsWith('https://')) {
+                urlToParse = 'http://' + urlToParse;
+            }
+            const url = new URL(urlToParse);
             const baseUrl = `${url.protocol}//${url.host}`;
+            setInputUrl(baseUrl);
             localStorage.setItem(STORAGE_KEY, baseUrl);
             onConnectionUrlChange(baseUrl);
         } catch (error) {
@@ -670,8 +687,29 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
 
     const handleConnectionUrlSubmit = (connectionId: string) => {
         const inputUrl = connectionInputs[connectionId] || '';
+        const trimmedUrl = inputUrl.trim();
+
+        // If field is empty, clear the connection URL
+        if (!trimmedUrl) {
+            const updatedConnections = connections.map(conn =>
+                conn.id === connectionId ? { ...conn, url: '' } : conn
+            );
+            setConnections(updatedConnections);
+            setConnectionInputs(prev => ({ ...prev, [connectionId]: '' }));
+            setConnectionValidities(prev => ({ ...prev, [connectionId]: null }));
+
+            localStorage.setItem(CONNECTIONS_STORAGE_KEY, JSON.stringify(updatedConnections));
+            onConnectionsChange(updatedConnections);
+            return;
+        }
+
         try {
-            const url = new URL(inputUrl.trim());
+            let urlToParse = trimmedUrl;
+            // Add http:// if no protocol specified
+            if (!urlToParse.startsWith('http://') && !urlToParse.startsWith('https://')) {
+                urlToParse = 'http://' + urlToParse;
+            }
+            const url = new URL(urlToParse);
             const baseUrl = `${url.protocol}//${url.host}`;
 
             const updatedConnections = connections.map(conn =>

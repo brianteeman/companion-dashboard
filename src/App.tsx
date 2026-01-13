@@ -208,6 +208,7 @@ export default function App() {
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [isConnected, setIsConnected] = useState<boolean>(true);
     const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const webSocketRef = useRef<WebSocket | null>(null);
 
     // Track dragging state globally for WebSocket sync
     useEffect(() => {
@@ -641,6 +642,12 @@ export default function App() {
             console.log('Running in browser, connecting to WebSocket...');
 
             const connectWebSocket = () => {
+                // Close existing WebSocket if it exists
+                if (webSocketRef.current && webSocketRef.current.readyState !== WebSocket.CLOSED) {
+                    console.log('Closing existing WebSocket before reconnecting');
+                    webSocketRef.current.close();
+                }
+
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 // Include the current path so server knows if this is /control or read-only
                 const path = window.location.pathname.startsWith('/control') ? '/control' : '/';
@@ -648,6 +655,7 @@ export default function App() {
                 console.log('WebSocket URL:', wsUrl);
 
                 const ws = new WebSocket(wsUrl);
+                webSocketRef.current = ws;
 
                 ws.onopen = () => {
                     console.log('✅ Connected to full app server for bidirectional sync');
@@ -768,13 +776,11 @@ export default function App() {
                     }
                 };
 
-                // Store WebSocket instance for sending changes
+                // Store WebSocket instance for sending changes (also accessible via ref)
                 (window as any).fullAppServerWS = ws;
-
-                return ws;
             };
 
-            const ws = connectWebSocket();
+            connectWebSocket();
 
             return () => {
                 console.log('Cleaning up WebSocket connection');
@@ -782,9 +788,10 @@ export default function App() {
                     clearInterval(reconnectIntervalRef.current);
                     reconnectIntervalRef.current = null;
                 }
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.close();
+                if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
+                    webSocketRef.current.close();
                 }
+                webSocketRef.current = null;
             };
         }
     }, []);
