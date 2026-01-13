@@ -176,6 +176,20 @@ a {
     gap: 8px;
 }
 
+.settings-subsection,
+.canvas-image-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
 .canvas-color-label {
     text-transform: uppercase;
     font-size: 11px;
@@ -190,6 +204,7 @@ a {
     align-items: center;
     gap: 10px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 /* Updated for ColorPicker component */
@@ -228,6 +243,7 @@ a {
     align-items: center;
     gap: 8px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .canvas-variable-input,
@@ -241,6 +257,7 @@ a {
     padding: 0 8px;
     font-size: 13px;
     box-sizing: border-box;
+    min-width: 0;
 }
 
 .canvas-variable-input:focus,
@@ -298,6 +315,7 @@ a {
     gap: 8px;
     margin-top: 8px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .canvas-browse-button {
@@ -344,6 +362,7 @@ a {
     gap: 10px;
     margin-top: 10px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .canvas-opacity-controls label {
@@ -352,7 +371,7 @@ a {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    min-width: 150px;
+    flex-shrink: 0;
 }
 
 .canvas-opacity-input {
@@ -370,6 +389,130 @@ a {
 
 .canvas-opacity-input:focus {
     outline: none;
+    border-color: #61BAFA;
+}
+
+.canvas-image-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+.canvas-image-size-controls label {
+    color: #61BAFA;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: fit-content;
+}
+
+.canvas-image-size-controls select,
+.canvas-image-size-controls input[type="number"] {
+    height: 40px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background-color: #1a1a1a;
+    color: white;
+    padding: 0 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.canvas-image-size-controls select {
+    flex: 1;
+    min-width: 150px;
+}
+
+.canvas-image-size-controls input[type="number"] {
+    width: 100px;
+    text-align: center;
+}
+
+.canvas-image-size-controls select:focus,
+.canvas-image-size-controls input[type="number"]:focus {
+    outline: none;
+    border-color: #61BAFA;
+}
+
+.scaling-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.scaling-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.scaling-checkbox-row input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.scaling-checkbox-row label {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.scaling-width-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.scaling-width-row label {
+    font-size: 14px;
+    min-width: 100px;
+    color: #61BAFA;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
+.scaling-width-row input[type="number"] {
+    width: 100px;
+    height: 40px;
+    padding: 0 10px;
+    background-color: #1a1a1a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.scaling-width-row input[type="number"]:focus {
+    outline: none;
+    border-color: #61BAFA;
+}
+
+.scaling-width-row button {
+    padding: 6px 12px;
+    height: 40px;
+    background-color: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.scaling-width-row button:hover {
+    background-color: #3a3a3a;
     border-color: #61BAFA;
 }
 
@@ -495,11 +638,15 @@ a {
     flex-direction: row;
     gap: 5px;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .connection-controls input[type="text"] {
     flex: 1;
     margin: 0;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .connection-controls button {
@@ -508,6 +655,7 @@ a {
     min-width: 50px;
     height: 40px;
     padding: 0 15px;
+    flex-shrink: 0;
 }
 
 .delete-connection-button {

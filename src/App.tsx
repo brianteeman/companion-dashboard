@@ -268,6 +268,30 @@ export default function App() {
         }
         return 100;
     });
+    const [canvasBackgroundImageSize, setCanvasBackgroundImageSize] = useState<'cover' | 'contain' | 'width'>(() => {
+        const saved = localStorage.getItem(CANVAS_STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return parsed.canvasBackgroundImageSize || 'cover';
+            } catch (error) {
+                return 'cover';
+            }
+        }
+        return 'cover';
+    });
+    const [canvasBackgroundImageWidth, setCanvasBackgroundImageWidth] = useState<number>(() => {
+        const saved = localStorage.getItem(CANVAS_STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return parsed.canvasBackgroundImageWidth || 1920;
+            } catch (error) {
+                return 1920;
+            }
+        }
+        return 1920;
+    });
     const [refreshRateMs, setRefreshRateMs] = useState<number>(() => {
         const saved = localStorage.getItem(CANVAS_STORAGE_KEY);
         if (saved) {
@@ -337,10 +361,12 @@ export default function App() {
             canvasBackgroundColorText,
             canvasBackgroundVariableColors,
             canvasBackgroundImageOpacity,
+            canvasBackgroundImageSize,
+            canvasBackgroundImageWidth,
             refreshRateMs
         };
         localStorage.setItem(CANVAS_STORAGE_KEY, JSON.stringify(canvasSettings));
-    }, [canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs]);
+    }, [canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, canvasBackgroundImageSize, canvasBackgroundImageWidth, refreshRateMs]);
 
     // Save companion connection URL to localStorage whenever it changes
     useEffect(() => {
@@ -483,6 +509,8 @@ export default function App() {
                     canvasBackgroundColorText,
                     canvasBackgroundVariableColors,
                     canvasBackgroundImageOpacity,
+                    canvasBackgroundImageSize,
+                    canvasBackgroundImageWidth,
                     refreshRateMs
                 };
 
@@ -538,7 +566,7 @@ export default function App() {
         };
 
         updateWebServer();
-    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, allVariableValues, allHtmlVariableValues, fontFamily, scaleEnabled, designWidth]);
+    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, canvasBackgroundImageSize, canvasBackgroundImageWidth, refreshRateMs, connections, companionBaseUrl, allVariableValues, allHtmlVariableValues, fontFamily, scaleEnabled, designWidth]);
 
     // WebSocket sync for full app server (when running in browser)
     useEffect(() => {
@@ -549,7 +577,7 @@ export default function App() {
         // If running in Electron, listen for state changes from browser clients
         if (isElectron) {
             console.log('Setting up Electron listener for browser state changes');
-            (window as any).electronAPI.onSyncStateFromBrowser((stateData: any) => {
+            (window as any).electronAPI.onSyncStateFromBrowser(async (stateData: any) => {
                 console.log('✅ Syncing state from browser client to Electron', stateData);
 
                 // Update all state from incoming browser data
@@ -564,6 +592,8 @@ export default function App() {
                     if (cs.canvasBackgroundColorText !== undefined) setCanvasBackgroundColorText(cs.canvasBackgroundColorText);
                     if (cs.canvasBackgroundVariableColors !== undefined) setCanvasBackgroundVariableColors(cs.canvasBackgroundVariableColors);
                     if (cs.canvasBackgroundImageOpacity !== undefined) setCanvasBackgroundImageOpacity(cs.canvasBackgroundImageOpacity);
+                    if (cs.canvasBackgroundImageSize !== undefined) setCanvasBackgroundImageSize(cs.canvasBackgroundImageSize);
+                    if (cs.canvasBackgroundImageWidth !== undefined) setCanvasBackgroundImageWidth(cs.canvasBackgroundImageWidth);
                     if (cs.refreshRateMs !== undefined) setRefreshRateMs(cs.refreshRateMs);
                     localStorage.setItem(CANVAS_STORAGE_KEY, JSON.stringify(cs));
                 }
@@ -582,6 +612,15 @@ export default function App() {
                     setFontFamily(stateData.fontFamily);
                     localStorage.setItem(FONT_STORAGE_KEY, stateData.fontFamily);
                     document.documentElement.style.setProperty('--box-font-family', `"${stateData.fontFamily}", system-ui, Avenir, Helvetica, Arial, sans-serif`);
+                }
+
+                // Store image data in IndexedDB
+                if (stateData.imageData) {
+                    for (const [filename, data] of Object.entries(stateData.imageData)) {
+                        if (typeof data === 'string') {
+                            await storeImageInDB(filename, data);
+                        }
+                    }
                 }
 
                 if (stateData.scaleEnabled !== undefined) {
@@ -620,7 +659,7 @@ export default function App() {
                     }
                 };
 
-                ws.onmessage = (event) => {
+                ws.onmessage = async (event) => {
                     try {
                         const message = JSON.parse(event.data);
                         console.log('📨 Received WebSocket message:', message.type);
@@ -654,6 +693,8 @@ export default function App() {
                                 if (cs.canvasBackgroundColorText !== undefined) setCanvasBackgroundColorText(cs.canvasBackgroundColorText);
                                 if (cs.canvasBackgroundVariableColors !== undefined) setCanvasBackgroundVariableColors(cs.canvasBackgroundVariableColors);
                                 if (cs.canvasBackgroundImageOpacity !== undefined) setCanvasBackgroundImageOpacity(cs.canvasBackgroundImageOpacity);
+                                if (cs.canvasBackgroundImageSize !== undefined) setCanvasBackgroundImageSize(cs.canvasBackgroundImageSize);
+                                if (cs.canvasBackgroundImageWidth !== undefined) setCanvasBackgroundImageWidth(cs.canvasBackgroundImageWidth);
                                 if (cs.refreshRateMs !== undefined) setRefreshRateMs(cs.refreshRateMs);
                                 localStorage.setItem(CANVAS_STORAGE_KEY, JSON.stringify(cs));
                             }
@@ -678,6 +719,16 @@ export default function App() {
                                 setFontFamily(data.fontFamily);
                                 localStorage.setItem(FONT_STORAGE_KEY, data.fontFamily);
                                 document.documentElement.style.setProperty('--box-font-family', `"${data.fontFamily}", system-ui, Avenir, Helvetica, Arial, sans-serif`);
+                            }
+
+                            // Store image data in IndexedDB
+                            if (data.imageData) {
+                                console.log('Storing image data in IndexedDB');
+                                for (const [filename, imageData] of Object.entries(data.imageData)) {
+                                    if (typeof imageData === 'string') {
+                                        await storeImageInDB(filename, imageData);
+                                    }
+                                }
                             }
 
                             // Update scaling settings
@@ -766,6 +817,8 @@ export default function App() {
                         canvasBackgroundColorText,
                         canvasBackgroundVariableColors,
                         canvasBackgroundImageOpacity,
+                        canvasBackgroundImageSize,
+                        canvasBackgroundImageWidth,
                         refreshRateMs
                     },
                     connections,
@@ -783,7 +836,7 @@ export default function App() {
                 console.log('⚠️ WebSocket not ready, state:', ws.readyState);
             }
         }
-    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, fontFamily, scaleEnabled, designWidth]);
+    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, canvasBackgroundImageSize, canvasBackgroundImageWidth, refreshRateMs, connections, companionBaseUrl, fontFamily, scaleEnabled, designWidth]);
 
     // Canvas color resolution function (same as Box component)
     const resolveCanvasColor = (variableColors: VariableColor[], colorText: string, fallbackColor: string) => {
@@ -834,7 +887,29 @@ export default function App() {
     // State for loaded background image
     const [loadedBackgroundImage, setLoadedBackgroundImage] = useState<string | null>(null);
 
-    // IndexedDB helper function for App.tsx
+    // IndexedDB helper functions for App.tsx
+    const storeImageInDB = async (filename: string, base64Data: string): Promise<void> => {
+        const request = indexedDB.open('CompanionDashboardImages', 3);
+        return new Promise((resolve, reject) => {
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                const db = request.result;
+                const transaction = db.transaction(['images'], 'readwrite');
+                const store = transaction.objectStore('images');
+                const imageData = { id: filename, data: base64Data };
+                store.put(imageData);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            };
+            request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result;
+                if (!db.objectStoreNames.contains('images')) {
+                    db.createObjectStore('images', { keyPath: 'id' });
+                }
+            };
+        });
+    };
+
     const getImageFromDB = async (filename: string): Promise<string | null> => {
         try {
             const request = indexedDB.open('CompanionDashboardImages', 3);
@@ -908,6 +983,22 @@ export default function App() {
 
         const opacity = canvasBackgroundImageOpacity / 100;
 
+        // Determine background-size based on sizing mode
+        let backgroundSize: string;
+        let backgroundPosition: string;
+
+        if (canvasBackgroundImageSize === 'cover') {
+            backgroundSize = 'cover';
+            backgroundPosition = 'center';
+        } else if (canvasBackgroundImageSize === 'contain') {
+            backgroundSize = 'contain';
+            backgroundPosition = 'top left';
+        } else { // width - apply scale factor if scaling is enabled
+            const scaledWidth = scaleEnabled ? canvasBackgroundImageWidth * scale : canvasBackgroundImageWidth;
+            backgroundSize = `${scaledWidth}px auto`;
+            backgroundPosition = 'top left';
+        }
+
         // Check if the resolved background color is actually an image URL
         if (isImageUrl(actualCanvasBackgroundColor)) {
             let imageUrl = actualCanvasBackgroundColor;
@@ -921,7 +1012,9 @@ export default function App() {
                 backgroundColor: canvasBackgroundColor, // Always use the solid color picker value as base
                 position: 'relative' as const,
                 '--canvas-background-image': `url("${imageUrl}")`,
-                '--canvas-background-opacity': opacity
+                '--canvas-background-opacity': opacity,
+                '--canvas-background-size': backgroundSize,
+                '--canvas-background-position': backgroundPosition
             };
         }
 
@@ -931,7 +1024,9 @@ export default function App() {
                 backgroundColor: canvasBackgroundColor, // Always use the solid color picker value as base
                 position: 'relative' as const,
                 '--canvas-background-image': `url(${loadedBackgroundImage})`,
-                '--canvas-background-opacity': opacity
+                '--canvas-background-opacity': opacity,
+                '--canvas-background-size': backgroundSize,
+                '--canvas-background-position': backgroundPosition
             };
         }
 
@@ -1109,6 +1204,10 @@ export default function App() {
                 onCanvasBackgroundVariableColorsChange={setCanvasBackgroundVariableColors}
                 canvasBackgroundImageOpacity={canvasBackgroundImageOpacity}
                 onCanvasBackgroundImageOpacityChange={setCanvasBackgroundImageOpacity}
+                canvasBackgroundImageSize={canvasBackgroundImageSize}
+                onCanvasBackgroundImageSizeChange={setCanvasBackgroundImageSize}
+                canvasBackgroundImageWidth={canvasBackgroundImageWidth}
+                onCanvasBackgroundImageWidthChange={setCanvasBackgroundImageWidth}
                 refreshRateMs={refreshRateMs}
                 onRefreshRateMsChange={setRefreshRateMs}
                 fontFamily={fontFamily}

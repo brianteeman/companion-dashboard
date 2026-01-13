@@ -49,6 +49,10 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     onCanvasBackgroundVariableColorsChange?: (variableColors: VariableColor[]) => void;
     canvasBackgroundImageOpacity?: number;
     onCanvasBackgroundImageOpacityChange?: (opacity: number) => void;
+    canvasBackgroundImageSize?: 'cover' | 'contain' | 'width';
+    onCanvasBackgroundImageSizeChange?: (size: 'cover' | 'contain' | 'width') => void;
+    canvasBackgroundImageWidth?: number;
+    onCanvasBackgroundImageWidthChange?: (width: number) => void;
     refreshRateMs?: number;
     onRefreshRateMsChange?: (refreshRate: number) => void;
     fontFamily?: string;
@@ -76,6 +80,10 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     onCanvasBackgroundVariableColorsChange,
     canvasBackgroundImageOpacity,
     onCanvasBackgroundImageOpacityChange,
+    canvasBackgroundImageSize,
+    onCanvasBackgroundImageSizeChange,
+    canvasBackgroundImageWidth,
+    onCanvasBackgroundImageWidthChange,
     refreshRateMs,
     onRefreshRateMsChange,
     fontFamily,
@@ -1083,21 +1091,24 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                     </div>
                     <span className='section-label'>Companion Connection</span>
                     <div className='menu-section'>
-                        <div className="canvas-refresh-rate-controls">
-                            <label htmlFor="canvas-refresh-rate" className="connection-label">Variable Refresh Rate (ms)</label>
-                            <input
-                                id="canvas-refresh-rate"
-                                type="number"
-                                min="50"
-                                max="10000"
-                                value={refreshRateMs || 100}
-                                onChange={(e) => onRefreshRateMsChange?.(parseInt(e.target.value) || 100)}
-                                className="canvas-color-text"
-                                style={{ marginLeft: '15px', textAlign: 'center' }}
-                            />
+                        <div className="settings-subsection">
+                            <div className="canvas-refresh-rate-controls">
+                                <label htmlFor="canvas-refresh-rate" className="connection-label">Variable Refresh Rate (ms)</label>
+                                <input
+                                    id="canvas-refresh-rate"
+                                    type="number"
+                                    min="50"
+                                    max="10000"
+                                    value={refreshRateMs || 100}
+                                    onChange={(e) => onRefreshRateMsChange?.(parseInt(e.target.value) || 100)}
+                                    className="canvas-color-text"
+                                    style={{ marginLeft: '15px', textAlign: 'center' }}
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className="menu-section-column">
+                        <div className="settings-subsection">
                         <div className="connection-item">
                             <span className="connection-label">Default Connection</span>
                             <div className="connection-controls">
@@ -1146,12 +1157,13 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             </div>
                         ))}
 
-                        <button
-                            className="add-connection-button"
-                            onClick={addConnection}
-                        >
-                            <FaCirclePlus />
-                        </button>
+                            <button
+                                className="add-connection-button"
+                                onClick={addConnection}
+                            >
+                                <FaCirclePlus />
+                            </button>
+                        </div>
                     </div>
                     <span className='section-label'>Font</span>
                     <div className='menu-section font-section'>
@@ -1167,74 +1179,53 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
 
                     {!Capacitor.isNativePlatform() && (
                         <>
-                            <span className='section-label'>Scaling</span>
+                            <span className='section-label'>Responsive Scaling</span>
                             <div className='menu-section scaling-section'>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <input
-                                            type="checkbox"
-                                            id="scale-enabled"
-                                            checked={scaleEnabled}
-                                            onChange={(e) => onScaleEnabledChange?.(e.target.checked)}
-                                            style={{ cursor: 'pointer' }}
-                                        />
-                                        <label htmlFor="scale-enabled" style={{ cursor: 'pointer', fontSize: '14px' }}>
-                                            Scale to fit width
-                                        </label>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <label htmlFor="design-width" style={{ fontSize: '14px', minWidth: '100px' }}>
-                                            Design width:
-                                        </label>
-                                        <input
-                                            id="design-width"
-                                            type="number"
-                                            value={designWidth}
-                                            onChange={(e) => {
-                                                const value = parseInt(e.target.value) || 1920;
-                                                onDesignWidthChange?.(value);
-                                            }}
-                                            min="320"
-                                            max="7680"
-                                            style={{
-                                                width: '100px',
-                                                padding: '6px',
-                                                backgroundColor: '#1a1a1a',
-                                                color: 'white',
-                                                border: '1px solid #333',
-                                                borderRadius: '4px'
-                                            }}
-                                        />
-                                        <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
-                                        <button
-                                            onClick={() => {
-                                                if (typeof window !== 'undefined') {
-                                                    onDesignWidthChange?.(window.innerWidth);
-                                                }
-                                            }}
-                                            style={{
-                                                padding: '6px 12px',
-                                                backgroundColor: '#2a2a2a',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '12px',
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            Use Current
-                                        </button>
-                                    </div>
+                                <div className='scaling-checkbox-row'>
+                                    <input
+                                        type="checkbox"
+                                        id="scale-enabled"
+                                        checked={scaleEnabled}
+                                        onChange={(e) => onScaleEnabledChange?.(e.target.checked)}
+                                    />
+                                    <label htmlFor="scale-enabled">
+                                        Scale based on width
+                                    </label>
+                                </div>
+                                <div className='scaling-width-row'>
+                                    <label htmlFor="design-width">
+                                        Width:
+                                    </label>
+                                    <input
+                                        id="design-width"
+                                        type="number"
+                                        value={designWidth}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value) || 1920;
+                                            onDesignWidthChange?.(value);
+                                        }}
+                                        min="320"
+                                        max="7680"
+                                    />
+                                    <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
+                                    <button
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined') {
+                                                onDesignWidthChange?.(window.innerWidth);
+                                            }
+                                        }}
+                                    >
+                                        Use Current Canvas Width
+                                    </button>
                                 </div>
                             </div>
                         </>
                     )}
 
-                    <span className='section-label'>Canvas</span>
+                    <span className='section-label'>Background</span>
                     <div className='menu-section canvas-section'>
-                        <div className="canvas-color-container">
-                            <span className="canvas-color-label">Default Background</span>
+                        <div className="settings-subsection">
+                            <span className="canvas-color-label">Color</span>
                             <div className="canvas-color-input-group">
                                 <ColorPicker
                                     value={canvasBackgroundColor || '#000000'}
@@ -1249,38 +1240,8 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                     className="canvas-color-text"
                                 />
                             </div>
-                            <div className="canvas-image-controls">
-                                <button
-                                    type="button"
-                                    onClick={handleBackgroundImageBrowse}
-                                    className="canvas-browse-button"
-                                >
-                                    Browse Image
-                                </button>
-                                {canvasBackgroundColorText && canvasBackgroundColorText.startsWith('./src/assets/background_') && (
-                                    <button
-                                        type="button"
-                                        onClick={clearCachedBackground}
-                                        className="canvas-clear-button"
-                                    >
-                                        Clear Image
-                                    </button>
-                                )}
-                            </div>
-                            <div className="canvas-opacity-controls">
-                                <label htmlFor="canvas-background-opacity">Background Image Opacity (%)</label>
-                                <input
-                                    id="canvas-background-opacity"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={canvasBackgroundImageOpacity || 100}
-                                    onChange={(e) => onCanvasBackgroundImageOpacityChange?.(parseInt(e.target.value) || 100)}
-                                    className="canvas-opacity-input"
-                                />
-                            </div>
-                        </div>
-                        <div className="canvas-variable-color-container">
+
+                            <div className="canvas-variable-color-container">
                             <span className="canvas-color-label">Variable Background Color</span>
                             <div className="canvas-variable-color-section">
                                 {(canvasBackgroundVariableColors || []).map(vc => (
@@ -1324,6 +1285,67 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                         </div>
                     </div>
 
+                    <div className="canvas-image-group">
+                            <span className="canvas-color-label">Background Image</span>
+                            <div className="canvas-image-controls">
+                                <button
+                                    type="button"
+                                    onClick={handleBackgroundImageBrowse}
+                                    className="canvas-browse-button"
+                                >
+                                    Browse Image
+                                </button>
+                                {canvasBackgroundColorText && canvasBackgroundColorText.startsWith('./src/assets/background_') && (
+                                    <button
+                                        type="button"
+                                        onClick={clearCachedBackground}
+                                        className="canvas-clear-button"
+                                    >
+                                        Clear Image
+                                    </button>
+                                )}
+                            </div>
+                            <div className="canvas-opacity-controls">
+                                <label htmlFor="canvas-background-opacity">Background Image Opacity (%)</label>
+                                <input
+                                    id="canvas-background-opacity"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={canvasBackgroundImageOpacity || 100}
+                                    onChange={(e) => onCanvasBackgroundImageOpacityChange?.(parseInt(e.target.value) || 100)}
+                                    className="canvas-opacity-input"
+                                />
+                            </div>
+                            <div className="canvas-image-size-controls">
+                                <label htmlFor="canvas-image-size">Background Image Size</label>
+                                <select
+                                    id="canvas-image-size"
+                                    value={canvasBackgroundImageSize || 'cover'}
+                                    onChange={(e) => onCanvasBackgroundImageSizeChange?.(e.target.value as 'cover' | 'contain' | 'width')}
+                                >
+                                    <option value="cover">Cover (fill canvas)</option>
+                                    <option value="contain">Contain (fit entire image)</option>
+                                    <option value="width">Custom Width</option>
+                                </select>
+                            </div>
+                            {canvasBackgroundImageSize === 'width' && (
+                                <div className="canvas-image-size-controls">
+                                    <label htmlFor="canvas-image-width">Custom Width</label>
+                                    <input
+                                        id="canvas-image-width"
+                                        type="number"
+                                        min="100"
+                                        max="10000"
+                                        value={canvasBackgroundImageWidth || 1920}
+                                        onChange={(e) => onCanvasBackgroundImageWidthChange?.(parseInt(e.target.value) || 1920)}
+                                    />
+                                    <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <span className='section-label'>Boxes</span>
                     <div className='menu-section'>
                         <button onClick={onNewBox}>NEW BOX</button>
@@ -1344,6 +1366,7 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                         <>
                             <span className='section-label'>WEB SERVER</span>
                             <div className='menu-section'>
+                                <div className="settings-subsection">
                                 <div className="web-server-controls">
                                     <div className="web-server-port-container">
                                         <label htmlFor="web-server-hostname">mDNS:</label>
@@ -1391,9 +1414,12 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                         Status: {webServerStatus}
                                     </div>
                                 </div>
+                                </div>
                             </div>
                             {webServerRunning && webServerEndpoints.length > 0 && (
                                 <>
+                                    <div className='menu-section'>
+                                    <div className="settings-subsection">
                                     <div className='menu-section-column'>
                                         {/* Display View URLs (Read-Only) */}
                                         {webServerEndpoints.filter(e => e.type === 'read-only').length > 0 && (
@@ -1445,6 +1471,8 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                                 ))}
                                             </>
                                         )}
+                                    </div>
+                                    </div>
                                     </div>
                                 </>
                             )}

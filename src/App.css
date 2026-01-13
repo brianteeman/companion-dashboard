@@ -11,8 +11,8 @@
     right: 0;
     bottom: 0;
     background-image: var(--canvas-background-image);
-    background-size: cover;
-    background-position: center;
+    background-size: var(--canvas-background-size, cover);
+    background-position: var(--canvas-background-position, center);
     background-repeat: no-repeat;
     opacity: var(--canvas-background-opacity, 1);
     z-index: 0;
