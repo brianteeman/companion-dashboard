@@ -11,6 +11,22 @@ It is a display of boxes you can resize and move. Each of those boxes has an opt
 ## Installation
 Download the latest releases [here](https://github.com/tomhillmeyer/companion-dashboard/releases) for Mac (ARM), Mac (Intel), Linux (amd64), Linux (arm64) and Windows (x64).
 
+
+### Linux Server (Raspberry Pi, NUC, etc.)
+Install a Debian Linux installation such as Raspberry Pi OS, Ubuntu Server, or Companion Pi. After installation, running this script will install the latest release of the app from GitHub, or update an already existing installation. Supports ARM (Raspberry Pi, etc.) and Intel (Intel NUC, etc.).
+
+Dashboard will launch full screen upon boot. It is the full version of the app, but also auto-starts the web server for remote configuration.
+
+Run this script to install, either directly on the device or over SSH:
+
+`curl -fsSL https://raw.githubusercontent.com/tomhillmeyer/companion-dashboard/main/install.sh | bash`
+
+Requires a reboot after installation:
+
+`sudo reboot`
+
+### iOS TestFlight
+
 There is a TestFlight beta test for iPad. To be added to the beta, contact me at [tom@tomhillmeyer.com](mailto:tom@tomhillmeyer.com).
 
 ## Example Layouts
