@@ -1109,53 +1109,53 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                     </div>
                     <div className="menu-section-column">
                         <div className="settings-subsection">
-                        <div className="connection-item">
-                            <span className="connection-label">Default Connection</span>
-                            <div className="connection-controls">
-                                <input
-                                    type="text"
-                                    value={inputUrl}
-                                    onChange={handleUrlChange}
-                                    placeholder="http://127.0.0.1:8888/"
-                                    style={{
-                                        border: '1px solid',
-                                        borderColor:
-                                            isValidUrl === null ? 'gray' :
-                                                isValidUrl === true ? 'green' :
-                                                    'red'
-                                    }}
-                                />
-                                <button onClick={handleUrlSubmit}>SET</button>
-                            </div>
-                        </div>
-
-                        {connections.map((connection, index) => (
-                            <div key={connection.id} className="connection-item">
-                                <span className="connection-label">Connection [{index + 1}]</span>
+                            <div className="connection-item">
+                                <span className="connection-label">Default Connection</span>
                                 <div className="connection-controls">
                                     <input
                                         type="text"
-                                        value={connectionInputs[connection.id] || ''}
-                                        onChange={(e) => handleConnectionUrlChange(connection.id, e.target.value)}
+                                        value={inputUrl}
+                                        onChange={handleUrlChange}
                                         placeholder="http://127.0.0.1:8888/"
                                         style={{
                                             border: '1px solid',
                                             borderColor:
-                                                connectionValidities[connection.id] === null ? 'gray' :
-                                                    connectionValidities[connection.id] === true ? 'green' :
+                                                isValidUrl === null ? 'gray' :
+                                                    isValidUrl === true ? 'green' :
                                                         'red'
                                         }}
                                     />
-                                    <button onClick={() => handleConnectionUrlSubmit(connection.id)}>SET</button>
-                                    <button
-                                        onClick={(e) => deleteConnection(connection.id, e)}
-                                        className="delete-connection-button"
-                                    >
-                                        <FaTrash />
-                                    </button>
+                                    <button onClick={handleUrlSubmit}>SET</button>
                                 </div>
                             </div>
-                        ))}
+
+                            {connections.map((connection, index) => (
+                                <div key={connection.id} className="connection-item">
+                                    <span className="connection-label">Connection [{index + 1}]</span>
+                                    <div className="connection-controls">
+                                        <input
+                                            type="text"
+                                            value={connectionInputs[connection.id] || ''}
+                                            onChange={(e) => handleConnectionUrlChange(connection.id, e.target.value)}
+                                            placeholder="http://127.0.0.1:8888/"
+                                            style={{
+                                                border: '1px solid',
+                                                borderColor:
+                                                    connectionValidities[connection.id] === null ? 'gray' :
+                                                        connectionValidities[connection.id] === true ? 'green' :
+                                                            'red'
+                                            }}
+                                        />
+                                        <button onClick={() => handleConnectionUrlSubmit(connection.id)}>SET</button>
+                                        <button
+                                            onClick={(e) => deleteConnection(connection.id, e)}
+                                            className="delete-connection-button"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
 
                             <button
                                 className="add-connection-button"
@@ -1194,7 +1194,7 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                 </div>
                                 <div className='scaling-width-row'>
                                     <label htmlFor="design-width">
-                                        Width:
+                                        Width (px)
                                     </label>
                                     <input
                                         id="design-width"
@@ -1207,7 +1207,6 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                         min="320"
                                         max="7680"
                                     />
-                                    <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
                                     <button
                                         onClick={() => {
                                             if (typeof window !== 'undefined') {
@@ -1242,50 +1241,50 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             </div>
 
                             <div className="canvas-variable-color-container">
-                            <span className="canvas-color-label">Variable Background Color</span>
-                            <div className="canvas-variable-color-section">
-                                {(canvasBackgroundVariableColors || []).map(vc => (
-                                    <div key={vc.id} className="canvas-variable-color-row">
-                                        <input
-                                            type="text"
-                                            value={vc.variable}
-                                            onChange={(e) => updateCanvasVariableColor(vc.id, 'variable', e.target.value)}
-                                            placeholder="Variable"
-                                            className="canvas-variable-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={vc.value}
-                                            onChange={(e) => updateCanvasVariableColor(vc.id, 'value', e.target.value)}
-                                            placeholder="Value"
-                                            className="canvas-value-input"
-                                        />
-                                        <ColorPicker
-                                            value={vc.color}
-                                            onChange={(color) => updateCanvasVariableColor(vc.id, 'color', color)}
-                                            className="canvas-variable-color-picker"
-                                        />
-                                        <button
-                                            type="button"
-                                            className="canvas-remove-variable-color-button"
-                                            onClick={(e) => removeCanvasVariableColor(vc.id, e)}
-                                        >
-                                            <FaCircleMinus />
-                                        </button>
-                                    </div>
-                                ))}
+                                <span className="canvas-color-label">Variable Background Color</span>
+                                <div className="canvas-variable-color-section">
+                                    {(canvasBackgroundVariableColors || []).map(vc => (
+                                        <div key={vc.id} className="canvas-variable-color-row">
+                                            <input
+                                                type="text"
+                                                value={vc.variable}
+                                                onChange={(e) => updateCanvasVariableColor(vc.id, 'variable', e.target.value)}
+                                                placeholder="Variable"
+                                                className="canvas-variable-input"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={vc.value}
+                                                onChange={(e) => updateCanvasVariableColor(vc.id, 'value', e.target.value)}
+                                                placeholder="Value"
+                                                className="canvas-value-input"
+                                            />
+                                            <ColorPicker
+                                                value={vc.color}
+                                                onChange={(color) => updateCanvasVariableColor(vc.id, 'color', color)}
+                                                className="canvas-variable-color-picker"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="canvas-remove-variable-color-button"
+                                                onClick={(e) => removeCanvasVariableColor(vc.id, e)}
+                                            >
+                                                <FaCircleMinus />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="canvas-add-variable-color-button"
+                                    onClick={addCanvasVariableColor}
+                                >
+                                    <FaCirclePlus />
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                className="canvas-add-variable-color-button"
-                                onClick={addCanvasVariableColor}
-                            >
-                                <FaCirclePlus />
-                            </button>
                         </div>
-                    </div>
 
-                    <div className="canvas-image-group">
+                        <div className="canvas-image-group">
                             <span className="canvas-color-label">Background Image</span>
                             <div className="canvas-image-controls">
                                 <button
@@ -1367,112 +1366,112 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             <span className='section-label'>WEB SERVER</span>
                             <div className='menu-section'>
                                 <div className="settings-subsection">
-                                <div className="web-server-controls">
-                                    <div className="web-server-port-container">
-                                        <label htmlFor="web-server-hostname">mDNS:</label>
-                                        <input
-                                            id="web-server-hostname"
-                                            type="text"
-                                            value={webServerHostname}
-                                            onChange={(e) => setWebServerHostname(e.target.value)}
-                                            disabled={webServerRunning}
-                                            placeholder="dashboard"
-                                            style={{ width: '120px', marginLeft: '10px' }}
-                                        />
-                                        <span style={{ marginLeft: '5px', opacity: 0.6 }}>.local</span>
+                                    <div className="web-server-controls">
+                                        <div className="web-server-port-container">
+                                            <label htmlFor="web-server-hostname">mDNS:</label>
+                                            <input
+                                                id="web-server-hostname"
+                                                type="text"
+                                                value={webServerHostname}
+                                                onChange={(e) => setWebServerHostname(e.target.value)}
+                                                disabled={webServerRunning}
+                                                placeholder="dashboard"
+                                                style={{ width: '120px', marginLeft: '10px' }}
+                                            />
+                                            <span style={{ marginLeft: '5px', opacity: 0.6 }}>.local</span>
+                                        </div>
+                                        <div className="web-server-port-container">
+                                            <label htmlFor="web-server-port">Port:</label>
+                                            <input
+                                                id="web-server-port"
+                                                type="number"
+                                                min="1"
+                                                max="65535"
+                                                value={webServerPort}
+                                                onChange={(e) => {
+                                                    const port = parseInt(e.target.value, 10);
+                                                    if (!isNaN(port)) {
+                                                        setWebServerPort(port);
+                                                    }
+                                                }}
+                                                disabled={webServerRunning}
+                                                style={{ width: '80px', marginLeft: '10px' }}
+                                            />
+                                        </div>
+                                        <div className="web-server-actions">
+                                            {webServerRunning ? (
+                                                <button onClick={stopWebServer} className="web-server-stop">
+                                                    STOP SERVER
+                                                </button>
+                                            ) : (
+                                                <button onClick={startWebServer} className="web-server-start">
+                                                    START SERVER
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="web-server-status">
+                                            Status: {webServerStatus}
+                                        </div>
                                     </div>
-                                    <div className="web-server-port-container">
-                                        <label htmlFor="web-server-port">Port:</label>
-                                        <input
-                                            id="web-server-port"
-                                            type="number"
-                                            min="1"
-                                            max="65535"
-                                            value={webServerPort}
-                                            onChange={(e) => {
-                                                const port = parseInt(e.target.value, 10);
-                                                if (!isNaN(port)) {
-                                                    setWebServerPort(port);
-                                                }
-                                            }}
-                                            disabled={webServerRunning}
-                                            style={{ width: '80px', marginLeft: '10px' }}
-                                        />
-                                    </div>
-                                    <div className="web-server-actions">
-                                        {webServerRunning ? (
-                                            <button onClick={stopWebServer} className="web-server-stop">
-                                                STOP SERVER
-                                            </button>
-                                        ) : (
-                                            <button onClick={startWebServer} className="web-server-start">
-                                                START SERVER
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="web-server-status">
-                                        Status: {webServerStatus}
-                                    </div>
-                                </div>
                                 </div>
                             </div>
                             {webServerRunning && webServerEndpoints.length > 0 && (
                                 <>
                                     <div className='menu-section'>
-                                    <div className="settings-subsection">
-                                    <div className='menu-section-column'>
-                                        {/* Display View URLs (Read-Only) */}
-                                        {webServerEndpoints.filter(e => e.type === 'read-only').length > 0 && (
-                                            <>
-                                                <div className="endpoint-section-label">
-                                                    Display View (Read-Only)
-                                                </div>
-                                                {webServerEndpoints.filter(e => e.type === 'read-only').map((endpoint, index) => (
-                                                    <a
-                                                        key={`ro-${index}`}
-                                                        href="#"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            if ((window as any).electronAPI?.openExternal) {
-                                                                (window as any).electronAPI.openExternal(endpoint.url);
-                                                            } else {
-                                                                window.open(endpoint.url, '_blank', 'noopener,noreferrer');
-                                                            }
-                                                        }}
-                                                        className="endpoint-link"
-                                                    >
-                                                        <code>{endpoint.url}</code>
-                                                    </a>
-                                                ))}
-                                            </>
-                                        )}
-                                        {/* Control View URLs (Full App) */}
-                                        {webServerEndpoints.filter(e => e.type === 'full-app').length > 0 && (
-                                            <>
-                                                <div className="endpoint-section-label">
-                                                    Control View (Full App)
-                                                </div>
-                                                {webServerEndpoints.filter(e => e.type === 'full-app').map((endpoint, index) => (
-                                                    <a
-                                                        key={`fa-${index}`}
-                                                        href="#"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            if ((window as any).electronAPI?.openExternal) {
-                                                                (window as any).electronAPI.openExternal(endpoint.url);
-                                                            } else {
-                                                                window.open(endpoint.url, '_blank', 'noopener,noreferrer');
-                                                            }
-                                                        }}
-                                                        className="endpoint-link"
-                                                    >
-                                                        <code>{endpoint.url}</code>
-                                                    </a>
-                                                ))}
-                                            </>
-                                        )}
-                                    </div>
-                                    </div>
+                                        <div className="settings-subsection">
+                                            <div className='menu-section-column'>
+                                                {/* Display View URLs (Read-Only) */}
+                                                {webServerEndpoints.filter(e => e.type === 'read-only').length > 0 && (
+                                                    <>
+                                                        <div className="endpoint-section-label">
+                                                            Display View (Read-Only)
+                                                        </div>
+                                                        {webServerEndpoints.filter(e => e.type === 'read-only').map((endpoint, index) => (
+                                                            <a
+                                                                key={`ro-${index}`}
+                                                                href="#"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    if ((window as any).electronAPI?.openExternal) {
+                                                                        (window as any).electronAPI.openExternal(endpoint.url);
+                                                                    } else {
+                                                                        window.open(endpoint.url, '_blank', 'noopener,noreferrer');
+                                                                    }
+                                                                }}
+                                                                className="endpoint-link"
+                                                            >
+                                                                <code>{endpoint.url}</code>
+                                                            </a>
+                                                        ))}
+                                                    </>
+                                                )}
+                                                {/* Control View URLs (Full App) */}
+                                                {webServerEndpoints.filter(e => e.type === 'full-app').length > 0 && (
+                                                    <>
+                                                        <div className="endpoint-section-label">
+                                                            Control View (Full App)
+                                                        </div>
+                                                        {webServerEndpoints.filter(e => e.type === 'full-app').map((endpoint, index) => (
+                                                            <a
+                                                                key={`fa-${index}`}
+                                                                href="#"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    if ((window as any).electronAPI?.openExternal) {
+                                                                        (window as any).electronAPI.openExternal(endpoint.url);
+                                                                    } else {
+                                                                        window.open(endpoint.url, '_blank', 'noopener,noreferrer');
+                                                                    }
+                                                                }}
+                                                                className="endpoint-link"
+                                                            >
+                                                                <code>{endpoint.url}</code>
+                                                            </a>
+                                                        ))}
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </>
                             )}

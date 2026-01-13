@@ -80,6 +80,7 @@ export interface BoxData {
     borderColorText: string;
     borderVariableColors: VariableColor[];
     noBorder: boolean;
+    borderRadius: number;
     headerColor: string;
     headerColorText: string;
     headerVariableColors: VariableColor[];
@@ -1062,6 +1063,7 @@ export default function App() {
             borderColorText: "",
             borderVariableColors: [],
             noBorder: true,
+            borderRadius: 15,
             headerColor: '#19325c',
             headerColorText: "",
             headerVariableColors: [],

@@ -717,6 +717,7 @@ export default function Box({
                             height: `${frame.height}px`,
                             ...getBackgroundStyle(),
                             border: boxData.noBorder ? 'none' : `5px solid ${resolveColor(boxData.borderVariableColors, boxData.borderColorText, boxData.borderColor, variableValues)}`,
+                            borderRadius: `${boxData.borderRadius ?? 15}px`,
                             WebkitTransform: `translate(${frame.translate[0]}px, ${frame.translate[1]}px) translateZ(0)`,
                             transform: `translate(${frame.translate[0]}px, ${frame.translate[1]}px) translateZ(0)`,
                             zIndex: boxData.zIndex,

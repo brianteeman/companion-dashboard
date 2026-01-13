@@ -679,11 +679,22 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
                             <div className="checkbox-container" style={{ marginLeft: '0px', }}>
                                 <input
                                     type="checkbox"
-                                    id="no-border"
-                                    checked={formData.noBorder}
-                                    onChange={(e) => updateField('noBorder', e.target.checked)}
+                                    id="border"
+                                    checked={!formData.noBorder}
+                                    onChange={(e) => updateField('noBorder', !e.target.checked)}
                                 />
-                                <label htmlFor="no-border">No border</label>
+                                <label htmlFor="border">Border</label>
+                            </div>
+                            <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span className="setting-header">Border Radius (px)</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={formData.borderRadius ?? 15}
+                                    onChange={(e) => updateField('borderRadius', parseInt(e.target.value) || 0)}
+                                    style={{ width: '80px' }}
+                                />
                             </div>
                         </div>
                     </div>
