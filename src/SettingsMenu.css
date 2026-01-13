@@ -112,10 +112,9 @@
     color: #61BAFA;
     text-transform: uppercase;
     padding-bottom: 10px;
-    margin-top: 20px;
+    margin-top: 50px;
     margin-bottom: 10px;
     border-bottom: .5px solid #61BAFA;
-    ;
 }
 
 input[type="text"] {
@@ -319,10 +318,10 @@ a {
 }
 
 .canvas-browse-button {
-    background-color: #61BAFA;
+    background-color: #2a2a2a;
     color: white;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid #444;
+    border-radius: 4px;
     padding: 8px 16px;
     font-size: 12px;
     font-weight: 600;
@@ -334,7 +333,8 @@ a {
 }
 
 .canvas-browse-button:hover {
-    background-color: #4a9ae8;
+    background-color: #3a3a3a;
+    border-color: #61BAFA;
 }
 
 .canvas-clear-button {
@@ -359,6 +359,7 @@ a {
 .canvas-opacity-controls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     margin-top: 10px;
     width: 100%;
@@ -395,11 +396,11 @@ a {
 .canvas-image-size-controls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     margin-top: 10px;
     width: 100%;
     box-sizing: border-box;
-    flex-wrap: wrap;
 }
 
 .canvas-image-size-controls label {
@@ -408,7 +409,7 @@ a {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    min-width: fit-content;
+    flex-shrink: 0;
 }
 
 .canvas-image-size-controls select,
@@ -424,7 +425,6 @@ a {
 }
 
 .canvas-image-size-controls select {
-    flex: 1;
     min-width: 150px;
 }
 
@@ -481,7 +481,7 @@ a {
 }
 
 .scaling-width-row input[type="number"] {
-    width: 100px;
+    width: 150px;
     height: 40px;
     padding: 0 10px;
     background-color: #1a1a1a;
@@ -656,6 +656,17 @@ a {
     height: 40px;
     padding: 0 15px;
     flex-shrink: 0;
+    background-color: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.connection-controls button:hover {
+    background-color: #3a3a3a;
+    border-color: #61BAFA;
 }
 
 .delete-connection-button {

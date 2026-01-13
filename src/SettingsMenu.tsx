@@ -1145,7 +1145,7 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             </div>
                         </div>
                     </div>
-                    <div className="menu-section-column">
+                    <div className="menu-section-column" style={{ marginTop: '15px' }}>
                         <div className="settings-subsection">
                             <div className="connection-item">
                                 <span className="connection-label">Default Connection</span>
@@ -1218,42 +1218,48 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                     {!Capacitor.isNativePlatform() && (
                         <>
                             <span className='section-label'>Responsive Scaling</span>
-                            <div className='menu-section scaling-section'>
-                                <div className='scaling-checkbox-row'>
-                                    <input
-                                        type="checkbox"
-                                        id="scale-enabled"
-                                        checked={scaleEnabled}
-                                        onChange={(e) => onScaleEnabledChange?.(e.target.checked)}
-                                    />
-                                    <label htmlFor="scale-enabled">
-                                        Scale based on width
-                                    </label>
+                            <div className='menu-section'>
+                                <div className='settings-subsection'>
+                                    <div className='scaling-checkbox-row'>
+                                        <input
+                                            type="checkbox"
+                                            id="scale-enabled"
+                                            checked={scaleEnabled}
+                                            onChange={(e) => onScaleEnabledChange?.(e.target.checked)}
+                                        />
+                                        <label htmlFor="scale-enabled" className="connection-label">
+                                            Scale based on width
+                                        </label>
+                                    </div>
                                 </div>
-                                <div className='scaling-width-row'>
-                                    <label htmlFor="design-width">
-                                        Width (px)
-                                    </label>
-                                    <input
-                                        id="design-width"
-                                        type="number"
-                                        value={designWidth}
-                                        onChange={(e) => {
-                                            const value = parseInt(e.target.value) || 1920;
-                                            onDesignWidthChange?.(value);
-                                        }}
-                                        min="320"
-                                        max="7680"
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            if (typeof window !== 'undefined') {
-                                                onDesignWidthChange?.(window.innerWidth);
-                                            }
-                                        }}
-                                    >
-                                        Use Current Canvas Width
-                                    </button>
+                            </div>
+                            <div className='menu-section' style={{ marginTop: '15px' }}>
+                                <div className='settings-subsection'>
+                                    <div className='scaling-width-row'>
+                                        <label htmlFor="design-width">
+                                            Width (px)
+                                        </label>
+                                        <input
+                                            id="design-width"
+                                            type="number"
+                                            value={designWidth}
+                                            onChange={(e) => {
+                                                const value = parseInt(e.target.value) || 1920;
+                                                onDesignWidthChange?.(value);
+                                            }}
+                                            min="320"
+                                            max="7680"
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                if (typeof window !== 'undefined') {
+                                                    onDesignWidthChange?.(window.innerWidth);
+                                                }
+                                            }}
+                                        >
+                                            USE CURRENT CANVAS WIDTH
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </>
@@ -1368,7 +1374,7 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             </div>
                             {canvasBackgroundImageSize === 'width' && (
                                 <div className="canvas-image-size-controls">
-                                    <label htmlFor="canvas-image-width">Custom Width</label>
+                                    <label htmlFor="canvas-image-width">Custom Width (px)</label>
                                     <input
                                         id="canvas-image-width"
                                         type="number"
@@ -1377,7 +1383,6 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                                         value={canvasBackgroundImageWidth || 1920}
                                         onChange={(e) => onCanvasBackgroundImageWidthChange?.(parseInt(e.target.value) || 1920)}
                                     />
-                                    <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
                                 </div>
                             )}
                         </div>
@@ -1455,14 +1460,14 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             </div>
                             {webServerRunning && webServerEndpoints.length > 0 && (
                                 <>
-                                    <div className='menu-section'>
+                                    <div className='menu-section' style={{ marginTop: '15px' }}>
                                         <div className="settings-subsection">
                                             <div className='menu-section-column'>
                                                 {/* Display View URLs (Read-Only) */}
                                                 {webServerEndpoints.filter(e => e.type === 'read-only').length > 0 && (
                                                     <>
                                                         <div className="endpoint-section-label">
-                                                            Display View (Read-Only)
+                                                            Display View (Canvas Locked)
                                                         </div>
                                                         {webServerEndpoints.filter(e => e.type === 'read-only').map((endpoint, index) => (
                                                             <a

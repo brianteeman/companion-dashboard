@@ -215,10 +215,10 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
 
                 // Draw and compress image
                 ctx?.drawImage(img, 0, 0, width, height);
-                
+
                 // Preserve PNG format for images with transparency
                 const isPNG = file.type === 'image/png';
-                const base64DataUrl = isPNG 
+                const base64DataUrl = isPNG
                     ? canvas.toDataURL('image/png')
                     : canvas.toDataURL('image/jpeg', quality);
 
@@ -388,7 +388,7 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
 
     const renderBackgroundSettings = () => (
         <div className="settings-section">
-            <div className="setting-title">Background</div>
+            <div className="setting-title">Background & Border</div>
             <div className="setting-group">
                 <div className='setting-container'>
                     <h3 className="section-heading">Background</h3>
@@ -474,7 +474,7 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
                 </div>
 
                 <div className='setting-container'>
-                    <h3 className="section-heading">Overlay</h3>
+                    <h3 className="section-heading">Background Overlay</h3>
 
                     {/* Color Row - wrap these together */}
                     <div style={{ display: 'flex', gap: '20px', flexBasis: '100%', flexWrap: 'wrap' }}>
