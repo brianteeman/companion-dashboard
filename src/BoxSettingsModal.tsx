@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { BoxData, VariableColor, VariableOpacity, VariableOverlaySize } from './App';
 import { v4 as uuid } from 'uuid';
 import './BoxSettingsModal.css';
@@ -1392,7 +1393,7 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
         }
     };
 
-    return (
+    return createPortal(
         <div className="modal-overlay" onClick={onCancel}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
@@ -1455,6 +1456,7 @@ export default function BoxSettingsModal({ boxData, onSave, onCancel, onDelete, 
                     </div>
                 </div>
             </div>
-        </div >
+        </div>,
+        document.body
     );
 }
