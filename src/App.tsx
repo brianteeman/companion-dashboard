@@ -582,6 +582,11 @@ export default function App() {
             (window as any).electronAPI.onSyncStateFromBrowser(async (stateData: any) => {
                 console.log('✅ Syncing state from browser client to Electron', stateData);
 
+                // Set flag to prevent sending this update back
+                // Use a timestamp to batch all state updates from this message
+                const batchId = Date.now();
+                (window as any).isReceivingUpdate = batchId;
+
                 // Update all state from incoming browser data
                 if (stateData.boxes) {
                     setBoxes(stateData.boxes);
@@ -634,6 +639,14 @@ export default function App() {
                     setDesignWidth(stateData.designWidth);
                     localStorage.setItem(DESIGN_WIDTH_KEY, stateData.designWidth.toString());
                 }
+
+                // Clear the receiving flag after a short delay to ensure all state updates are processed
+                setTimeout(() => {
+                    if ((window as any).isReceivingUpdate === batchId) {
+                        (window as any).isReceivingUpdate = false;
+                        console.log('✅ Batch update complete (from browser), re-enabling sync');
+                    }
+                }, 100);
             });
         }
 
@@ -685,7 +698,9 @@ export default function App() {
                             console.log('📥 Received state update from Electron', data);
 
                             // Set flag to prevent sending this update back
-                            (window as any).isReceivingUpdate = true;
+                            // Use a timestamp to batch all state updates from this message
+                            const batchId = Date.now();
+                            (window as any).isReceivingUpdate = batchId;
 
                             // Update boxes
                             if (data.boxes) {
@@ -752,6 +767,14 @@ export default function App() {
                                 setDesignWidth(data.designWidth);
                                 localStorage.setItem(DESIGN_WIDTH_KEY, data.designWidth.toString());
                             }
+
+                            // Clear the receiving flag after a short delay to ensure all state updates are processed
+                            setTimeout(() => {
+                                if ((window as any).isReceivingUpdate === batchId) {
+                                    (window as any).isReceivingUpdate = false;
+                                    console.log('✅ Batch update complete, re-enabling sync');
+                                }
+                            }, 100);
                         }
                     } catch (error) {
                         console.error('❌ Error processing WebSocket message:', error);
@@ -808,8 +831,7 @@ export default function App() {
 
         // Don't send if we're currently receiving an update (prevents infinite loop)
         if ((window as any).isReceivingUpdate) {
-            console.log('⏭️ Skipping send - currently receiving update');
-            (window as any).isReceivingUpdate = false; // Reset for next change
+            console.log('⏭️ Skipping send - currently receiving update (batch in progress)');
             return;
         }
 
