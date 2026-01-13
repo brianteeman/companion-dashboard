@@ -25,6 +25,8 @@ const CANVAS_STORAGE_KEY = `window_${windowId}_canvas_settings`;
 const CONNECTIONS_STORAGE_KEY = `window_${windowId}_companion_connections`;
 const FONT_STORAGE_KEY = `global_font_family`;
 const LOCK_STORAGE_KEY = `window_${windowId}_boxes_locked`;
+const SCALE_ENABLED_KEY = `window_${windowId}_scale_enabled`;
+const DESIGN_WIDTH_KEY = `window_${windowId}_design_width`;
 
 interface CompanionConnection {
     id: string;
@@ -284,6 +286,19 @@ export default function App() {
         return localStorage.getItem(FONT_STORAGE_KEY) || 'Work Sans';
     });
 
+    // Scaling state - initialize from localStorage
+    const [scaleEnabled, setScaleEnabled] = useState<boolean>(() => {
+        const saved = localStorage.getItem(SCALE_ENABLED_KEY);
+        return saved === 'true';
+    });
+
+    const [designWidth, setDesignWidth] = useState<number>(() => {
+        const saved = localStorage.getItem(DESIGN_WIDTH_KEY);
+        return saved ? parseInt(saved) : 1920;
+    });
+
+    const [scale, setScale] = useState<number>(1);
+
     // Check if we're in display mode (root path, not /control)
     const [isDisplayMode] = useState<boolean>(() => {
         if (typeof window === 'undefined') return false;
@@ -345,6 +360,30 @@ export default function App() {
             localStorage.setItem(LOCK_STORAGE_KEY, boxesLocked.toString());
         }
     }, [boxesLocked, isDisplayMode]);
+
+    // Save scaling settings to localStorage
+    useEffect(() => {
+        localStorage.setItem(SCALE_ENABLED_KEY, scaleEnabled.toString());
+    }, [scaleEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem(DESIGN_WIDTH_KEY, designWidth.toString());
+    }, [designWidth]);
+
+    // Update scale factor when window resizes or settings change
+    useEffect(() => {
+        const updateScale = () => {
+            if (scaleEnabled && typeof window !== 'undefined') {
+                setScale(window.innerWidth / designWidth);
+            } else {
+                setScale(1);
+            }
+        };
+
+        updateScale();
+        window.addEventListener('resize', updateScale);
+        return () => window.removeEventListener('resize', updateScale);
+    }, [scaleEnabled, designWidth]);
 
     // Wrapper for setBoxesLocked that prevents changes in display mode
     const handleBoxesLockedChange = (locked: boolean) => {
@@ -485,7 +524,9 @@ export default function App() {
                     variableValues: allVariableValues,
                     htmlVariableValues: allHtmlVariableValues,
                     imageData,
-                    fontFamily
+                    fontFamily,
+                    scaleEnabled,
+                    designWidth
                 };
 
                 // @ts-ignore - electronAPI is available via preload script
@@ -497,7 +538,7 @@ export default function App() {
         };
 
         updateWebServer();
-    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, allVariableValues, allHtmlVariableValues, fontFamily]);
+    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, allVariableValues, allHtmlVariableValues, fontFamily, scaleEnabled, designWidth]);
 
     // WebSocket sync for full app server (when running in browser)
     useEffect(() => {
@@ -541,6 +582,16 @@ export default function App() {
                     setFontFamily(stateData.fontFamily);
                     localStorage.setItem(FONT_STORAGE_KEY, stateData.fontFamily);
                     document.documentElement.style.setProperty('--box-font-family', `"${stateData.fontFamily}", system-ui, Avenir, Helvetica, Arial, sans-serif`);
+                }
+
+                if (stateData.scaleEnabled !== undefined) {
+                    setScaleEnabled(stateData.scaleEnabled);
+                    localStorage.setItem(SCALE_ENABLED_KEY, stateData.scaleEnabled.toString());
+                }
+
+                if (stateData.designWidth !== undefined) {
+                    setDesignWidth(stateData.designWidth);
+                    localStorage.setItem(DESIGN_WIDTH_KEY, stateData.designWidth.toString());
                 }
             });
         }
@@ -628,6 +679,19 @@ export default function App() {
                                 localStorage.setItem(FONT_STORAGE_KEY, data.fontFamily);
                                 document.documentElement.style.setProperty('--box-font-family', `"${data.fontFamily}", system-ui, Avenir, Helvetica, Arial, sans-serif`);
                             }
+
+                            // Update scaling settings
+                            if (data.scaleEnabled !== undefined) {
+                                console.log('Updating scale enabled:', data.scaleEnabled);
+                                setScaleEnabled(data.scaleEnabled);
+                                localStorage.setItem(SCALE_ENABLED_KEY, data.scaleEnabled.toString());
+                            }
+
+                            if (data.designWidth !== undefined) {
+                                console.log('Updating design width:', data.designWidth);
+                                setDesignWidth(data.designWidth);
+                                localStorage.setItem(DESIGN_WIDTH_KEY, data.designWidth.toString());
+                            }
                         }
                     } catch (error) {
                         console.error('❌ Error processing WebSocket message:', error);
@@ -706,7 +770,9 @@ export default function App() {
                     },
                     connections,
                     companionBaseUrl,
-                    fontFamily
+                    fontFamily,
+                    scaleEnabled,
+                    designWidth
                 };
 
                 ws.send(JSON.stringify({
@@ -717,7 +783,7 @@ export default function App() {
                 console.log('⚠️ WebSocket not ready, state:', ws.readyState);
             }
         }
-    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, fontFamily]);
+    }, [boxes, canvasBackgroundColor, canvasBackgroundColorText, canvasBackgroundVariableColors, canvasBackgroundImageOpacity, refreshRateMs, connections, companionBaseUrl, fontFamily, scaleEnabled, designWidth]);
 
     // Canvas color resolution function (same as Box component)
     const resolveCanvasColor = (variableColors: VariableColor[], colorText: string, fallbackColor: string) => {
@@ -1050,70 +1116,82 @@ export default function App() {
                 boxesLocked={boxesLocked}
                 onBoxesLockedChange={handleBoxesLockedChange}
                 isDisplayMode={isDisplayMode}
+                scaleEnabled={scaleEnabled}
+                onScaleEnabledChange={setScaleEnabled}
+                designWidth={designWidth}
+                onDesignWidthChange={setDesignWidth}
             />
-            {boxes.length === 0 ? (
-                <div style={{
-                    position: 'fixed',
-                    top: '0',
-                    left: '0',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    pointerEvents: 'none',
-                    backgroundColor: 'rgba(0,0,0,.9)',
-                    zIndex: 1,
-                }}>
-                    <img
-                        src={dashboardLogo}
-                        alt="Dashboard"
-                        style={{
-                            width: '500px',
-                            height: 'auto',
-                            opacity: 0.2,
-                            filter: 'grayscale(100%)'
-                        }}
-                    />
+            <div style={{
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+                width: scaleEnabled ? `${designWidth}px` : '100%',
+                minHeight: '100vh',
+                position: 'relative'
+            }}>
+                {boxes.length === 0 ? (
                     <div style={{
                         position: 'fixed',
-                        bottom: '32px',
-                        left: '120px',
-                        color: '#FFF',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        opacity: .5,
+                        top: '0',
+                        left: '0',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                        backgroundColor: 'rgba(0,0,0,.9)',
+                        zIndex: 1,
                     }}>
-                        Open the menu to add boxes!
+                        <img
+                            src={dashboardLogo}
+                            alt="Dashboard"
+                            style={{
+                                width: '500px',
+                                height: 'auto',
+                                opacity: 0.2,
+                                filter: 'grayscale(100%)'
+                            }}
+                        />
+                        <div style={{
+                            position: 'fixed',
+                            bottom: '32px',
+                            left: '120px',
+                            color: '#FFF',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            opacity: .5,
+                        }}>
+                            Open the menu to add boxes!
+                        </div>
                     </div>
-                </div>
-            ) : (
-                boxes.map((box) => (
-                    <Box
-                        key={box.id}
-                        boxData={box}
-                        isSelected={selectedBoxId === box.id} // Pass down selection state
-                        onSelect={() => setSelectedBoxId(box.id)} // Pass down select handler
-                        onDeselect={() => setSelectedBoxId(null)} // Pass down deselect handler
-                        onBoxUpdate={(updatedBox) => {
-                            setBoxes(prev => prev.map(b => b.id === updatedBox.id ? updatedBox : b));
-                        }}
-                        onDelete={(boxId) => {
-                            setBoxes((prev) => prev.filter((b) => b.id !== boxId));
-                            setSelectedBoxId(null);
-                        }}
-                        onDuplicate={duplicateBox}
-                        companionBaseUrl={companionBaseUrl}
-                        connections={connections}
-                        refreshRateMs={refreshRateMs}
-                        isDragging={isDragging}
-                        onDragStart={() => setIsDragging(true)}
-                        onDragEnd={() => setIsDragging(false)}
-                        boxesLocked={boxesLocked}
-                    />
-                ))
-            )}
+                ) : (
+                    boxes.map((box) => (
+                        <Box
+                            key={box.id}
+                            boxData={box}
+                            isSelected={selectedBoxId === box.id} // Pass down selection state
+                            onSelect={() => setSelectedBoxId(box.id)} // Pass down select handler
+                            onDeselect={() => setSelectedBoxId(null)} // Pass down deselect handler
+                            onBoxUpdate={(updatedBox) => {
+                                setBoxes(prev => prev.map(b => b.id === updatedBox.id ? updatedBox : b));
+                            }}
+                            onDelete={(boxId) => {
+                                setBoxes((prev) => prev.filter((b) => b.id !== boxId));
+                                setSelectedBoxId(null);
+                            }}
+                            onDuplicate={duplicateBox}
+                            companionBaseUrl={companionBaseUrl}
+                            connections={connections}
+                            refreshRateMs={refreshRateMs}
+                            isDragging={isDragging}
+                            onDragStart={() => setIsDragging(true)}
+                            onDragEnd={() => setIsDragging(false)}
+                            boxesLocked={boxesLocked}
+                        />
+                    ))
+                )}
+            </div>
         </div >
     );
 }

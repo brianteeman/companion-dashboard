@@ -57,6 +57,10 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     onBoxesLockedChange?: (locked: boolean) => void;
     onToggle?: () => void;
     isDisplayMode?: boolean;
+    scaleEnabled?: boolean;
+    onScaleEnabledChange?: (enabled: boolean) => void;
+    designWidth?: number;
+    onDesignWidthChange?: (width: number) => void;
 }>(({
     onNewBox,
     connectionUrl,
@@ -79,7 +83,11 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
     boxesLocked,
     onBoxesLockedChange,
     onToggle,
-    isDisplayMode = false
+    isDisplayMode = false,
+    scaleEnabled = false,
+    onScaleEnabledChange,
+    designWidth = 1920,
+    onDesignWidthChange
 }, ref) => {
     const [inputUrl, setInputUrl] = useState('');
     const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null);
@@ -288,7 +296,9 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                 companion_connections: connections ? JSON.parse(connections) : [],
                 canvas_settings: canvasSettingsObj,
                 background_image_data: backgroundImageData,
-                font_family: localStorage.getItem(FONT_STORAGE_KEY) || ''
+                font_family: localStorage.getItem(FONT_STORAGE_KEY) || '',
+                scale_enabled: localStorage.getItem(`window_${windowId}_scale_enabled`) === 'true',
+                design_width: parseInt(localStorage.getItem(`window_${windowId}_design_width`) || '1920')
             };
 
             console.log('Config export:', {
@@ -979,6 +989,17 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                 onFontFamilyChange?.(pendingConfig.font_family);
             }
 
+            // Restore scaling settings if they exist
+            if (pendingConfig.scale_enabled !== undefined) {
+                localStorage.setItem(`window_${windowId}_scale_enabled`, pendingConfig.scale_enabled.toString());
+                onScaleEnabledChange?.(pendingConfig.scale_enabled);
+            }
+
+            if (pendingConfig.design_width !== undefined) {
+                localStorage.setItem(`window_${windowId}_design_width`, pendingConfig.design_width.toString());
+                onDesignWidthChange?.(pendingConfig.design_width);
+            }
+
             // Restore background image if it exists
             if (pendingConfig.background_image_data && pendingConfig.canvas_settings?.canvasBackgroundColorText) {
                 const backgroundPath = pendingConfig.canvas_settings.canvasBackgroundColorText;
@@ -1143,6 +1164,72 @@ const SettingsMenu = forwardRef<{ toggle: () => void }, {
                             className="settings-font-picker"
                         />
                     </div>
+
+                    {!Capacitor.isNativePlatform() && (
+                        <>
+                            <span className='section-label'>Scaling</span>
+                            <div className='menu-section scaling-section'>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id="scale-enabled"
+                                            checked={scaleEnabled}
+                                            onChange={(e) => onScaleEnabledChange?.(e.target.checked)}
+                                            style={{ cursor: 'pointer' }}
+                                        />
+                                        <label htmlFor="scale-enabled" style={{ cursor: 'pointer', fontSize: '14px' }}>
+                                            Scale to fit width
+                                        </label>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <label htmlFor="design-width" style={{ fontSize: '14px', minWidth: '100px' }}>
+                                            Design width:
+                                        </label>
+                                        <input
+                                            id="design-width"
+                                            type="number"
+                                            value={designWidth}
+                                            onChange={(e) => {
+                                                const value = parseInt(e.target.value) || 1920;
+                                                onDesignWidthChange?.(value);
+                                            }}
+                                            min="320"
+                                            max="7680"
+                                            style={{
+                                                width: '100px',
+                                                padding: '6px',
+                                                backgroundColor: '#1a1a1a',
+                                                color: 'white',
+                                                border: '1px solid #333',
+                                                borderRadius: '4px'
+                                            }}
+                                        />
+                                        <span style={{ fontSize: '12px', opacity: 0.6 }}>px</span>
+                                        <button
+                                            onClick={() => {
+                                                if (typeof window !== 'undefined') {
+                                                    onDesignWidthChange?.(window.innerWidth);
+                                                }
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                backgroundColor: '#2a2a2a',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '12px',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            Use Current
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <span className='section-label'>Canvas</span>
                     <div className='menu-section canvas-section'>
