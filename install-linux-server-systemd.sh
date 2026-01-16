@@ -208,9 +208,13 @@ User=$ACTUAL_USER
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=$USER_HOME/.Xauthority
 ExecStartPre=/bin/sleep 5
-ExecStart=/usr/bin/startx $USER_HOME/.xinitrc -- :0 vt7
+ExecStart=/usr/bin/xinit $USER_HOME/.xinitrc -- /usr/bin/X :0 vt7 -nolisten tcp -noreset
 Restart=on-failure
 RestartSec=10
+StandardInput=tty
+TTYPath=/dev/tty7
+TTYReset=yes
+TTYVHangup=yes
 StandardOutput=journal
 StandardError=journal
 
