@@ -33,12 +33,18 @@ echo ""
 echo "Installing system dependencies..."
 apt-get update
 apt-get install -y \
-    xorg \
+    xserver-xorg \
+    xserver-xorg-video-fbdev \
+    xserver-xorg-input-all \
+    xserver-xorg-legacy \
+    xinit \
+    x11-xserver-utils \
     openbox \
+    mesa-utils \
+    libgl1-mesa-dri \
+    unclutter \
     nodejs \
     npm \
-    unclutter \
-    x11-xserver-utils \
     libcap2-bin \
     avahi-daemon \
     avahi-utils
